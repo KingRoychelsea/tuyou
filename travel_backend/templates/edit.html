@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑攻略 - 途游攻略分享平台</title>
+    <link rel="stylesheet" href="index.html">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <h1>途游攻略分享平台</h1>
+            <div class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="login.html" id="login-link">登录</a>
+                <a href="register.html" id="register-link">注册</a>
+                <a href="publish.html" id="publish-link" style="display: none;">发布攻略</a>
+                <a href="#" id="logout-link" style="display: none;">退出</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 编辑攻略表单 -->
+    <div class="container">
+        <div class="form-container">
+            <h2>编辑攻略</h2>
+            <div class="error-message" id="error-message"></div>
+            <form id="edit-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">标题</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="destination">目的地</label>
+                    <input type="text" id="destination" name="destination" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">攻略内容（至少10字）</label>
+                    <textarea id="content" name="content" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="images">图片（最多5张，支持jpg/png/jpeg）</label>
+                    <input type="file" id="images" name="images" multiple accept="image/jpeg,image/png">
+                </div>
+                <div class="form-group">
+                    <button type="submit">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let token = localStorage.getItem('token');
+        let userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        let strategyId = new URLSearchParams(window.location.search).get('id');
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新导航栏
+            updateNavbar();
+            
+            // 检查登录状态
+            if (!token) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            if (!strategyId) {
+                alert('攻略ID不能为空');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // 加载攻略详情
+            loadStrategyDetail();
+            
+            // 绑定退出事件
+            document.getElementById('logout-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            // 绑定表单提交
+            document.getElementById('edit-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitForm();
+            });
+        });
+        
+        // 更新导航栏
+        function updateNavbar() {
+            if (token) {
+                document.getElementById('login-link').style.display = 'none';
+                document.getElementById('register-link').style.display = 'none';
+                document.getElementById('publish-link').style.display = 'block';
+                document.getElementById('logout-link').style.display = 'block';
+            } else {
+                document.getElementById('login-link').style.display = 'block';
+                document.getElementById('register-link').style.display = 'block';
+                document.getElementById('publish-link').style.display = 'none';
+                document.getElementById('logout-link').style.display = 'none';
+            }
+        }
+        
+        // 加载攻略详情
+        function loadStrategyDetail() {
+            fetch(`http://localhost:5000/api/strategy/${strategyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        const strategy = data.data;
+                        
+                        // 检查权限
+                        if (strategy.user_id !== userInfo.id) {
+                            alert('无权限编辑此攻略');
+                            window.location.href = 'index.html';
+                            return;
+                        }
+                        
+                        // 填充表单
+                        document.getElementById('title').value = strategy.title;
+                        document.getElementById('destination').value = strategy.destination;
+                        document.getElementById('content').value = strategy.content;
+                    } else {
+                        alert(data.msg);
+                        window.location.href = 'index.html';
+                    }
+                })
+                .catch(error => {
+                    console.error('加载攻略详情失败:', error);
+                    alert('加载攻略详情失败，请稍后重试');
+                });
+        }
+        
+        // 提交表单
+        function submitForm() {
+            const title = document.getElementById('title').value;
+            const destination = document.getElementById('destination').value;
+            const content = document.getElementById('content').value;
+            const images = document.getElementById('images').files;
+            const errorMessage = document.getElementById('error-message');
+            
+            // 验证输入
+            if (!title || !destination || !content) {
+                errorMessage.textContent = '标题、目的地、内容不能为空';
+                return;
+            }
+            
+            if (content.length < 10) {
+                errorMessage.textContent = '攻略内容至少10字';
+                return;
+            }
+            
+            if (images.length > 5) {
+                errorMessage.textContent = '最多上传5张图片';
+                return;
+            }
+            
+            // 构建FormData
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('destination', destination);
+            formData.append('content', content);
+            
+            // 添加图片
+            for (let i = 0; i < images.length; i++) {
+                formData.append('images', images[i]);
+            }
+            
+            // 发送请求
+            fetch(`http://localhost:5000/api/strategy/${strategyId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    alert('攻略更新成功');
+                    window.location.href = `detail.html?id=${strategyId}`;
+                } else {
+                    errorMessage.textContent = data.msg;
+                }
+            })
+            .catch(error => {
+                console.error('更新攻略失败:', error);
+                errorMessage.textContent = '更新攻略失败，请稍后重试';
+            });
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userInfo');
+            token = null;
+            userInfo = null;
+            updateNavbar();
+            alert('退出成功');
+        }
+    </script>
+</body>
+</html>

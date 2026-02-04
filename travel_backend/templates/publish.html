@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布攻略 - 途游攻略分享平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        
+        .navbar {
+            background-color: #333;
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .navbar .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .navbar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            text-decoration: none;
+        }
+        
+        .form-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+            font-size: 22px;
+        }
+        
+        .error-message {
+            color: red;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #fff3f3;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+        
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        
+        .form-group input[type="file"] {
+            border: 1px solid #ddd;
+            padding: 8px;
+            background-color: #f9f9f9;
+        }
+        
+        .form-group button {
+            width: 100%;
+            padding: 14px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .form-group button:hover {
+            background-color: #45a049;
+            transform: translateY(-1px);
+        }
+        
+        .form-group button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <h1>途游攻略分享平台</h1>
+            <div class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="login.html" id="login-link">登录</a>
+                <a href="register.html" id="register-link">注册</a>
+                <a href="publish.html" id="publish-link" style="display: none;">发布攻略</a>
+                <a href="#" id="logout-link" style="display: none;">退出</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 发布攻略表单 -->
+    <div class="container">
+        <div class="form-container">
+            <h2>发布攻略</h2>
+            <div class="error-message" id="error-message"></div>
+            <form id="publish-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">标题</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="destination">目的地</label>
+                    <input type="text" id="destination" name="destination" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">攻略内容（至少10字）</label>
+                    <textarea id="content" name="content" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="images">图片（最多5张，支持jpg/png/jpeg）</label>
+                    <input type="file" id="images" name="images" multiple accept="image/jpeg,image/png">
+                </div>
+                <div class="form-group">
+                    <button type="submit">发布攻略</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let token = localStorage.getItem('token');
+        let userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新导航栏
+            updateNavbar();
+            
+            // 检查登录状态
+            if (!token) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 绑定退出事件
+            document.getElementById('logout-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            // 绑定表单提交
+            document.getElementById('publish-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitForm();
+            });
+        });
+        
+        // 更新导航栏
+        function updateNavbar() {
+            if (token) {
+                document.getElementById('login-link').style.display = 'none';
+                document.getElementById('register-link').style.display = 'none';
+                document.getElementById('publish-link').style.display = 'block';
+                document.getElementById('logout-link').style.display = 'block';
+            } else {
+                document.getElementById('login-link').style.display = 'block';
+                document.getElementById('register-link').style.display = 'block';
+                document.getElementById('publish-link').style.display = 'none';
+                document.getElementById('logout-link').style.display = 'none';
+            }
+        }
+        
+        // 提交表单
+        function submitForm() {
+            const title = document.getElementById('title').value;
+            const destination = document.getElementById('destination').value;
+            const content = document.getElementById('content').value;
+            const images = document.getElementById('images').files;
+            const errorMessage = document.getElementById('error-message');
+            
+            // 验证输入
+            if (!title || !destination || !content) {
+                errorMessage.textContent = '标题、目的地、内容不能为空';
+                return;
+            }
+            
+            if (content.length < 10) {
+                errorMessage.textContent = '攻略内容至少10字';
+                return;
+            }
+            
+            if (images.length > 5) {
+                errorMessage.textContent = '最多上传5张图片';
+                return;
+            }
+            
+            // 构建FormData
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('destination', destination);
+            formData.append('content', content);
+            
+            // 添加图片
+            for (let i = 0; i < images.length; i++) {
+                formData.append('images', images[i]);
+            }
+            
+            // 发送请求
+            fetch('http://localhost:5000/api/strategy', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    alert('攻略发布成功');
+                    window.location.href = 'index.html';
+                } else {
+                    errorMessage.textContent = data.msg;
+                }
+            })
+            .catch(error => {
+                console.error('发布攻略失败:', error);
+                errorMessage.textContent = '发布攻略失败，请稍后重试';
+            });
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userInfo');
+            token = null;
+            userInfo = null;
+            updateNavbar();
+            alert('退出成功');
+        }
+    </script>
+</body>
+</html>

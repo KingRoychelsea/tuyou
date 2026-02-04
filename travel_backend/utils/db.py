@@ -5,17 +5,22 @@
 """
 import pymysql
 from pymysql.cursors import DictCursor
+import os
+from dotenv import load_dotenv
+
+# 加载环境变量
+load_dotenv()
 
 class Database:
     """数据库操作类"""
     
     def __init__(self):
         """初始化数据库连接"""
-        self.host = '127.0.0.1'
-        self.port = 3306
-        self.user = 'root'
-        self.password = '612345'
-        self.database = 'travel_db'
+        self.host = os.getenv('DB_HOST', '127.0.0.1')
+        self.port = int(os.getenv('DB_PORT', '3306'))
+        self.user = os.getenv('DB_USER', 'root')
+        self.password = os.getenv('DB_PASSWORD', '612345')
+        self.database = os.getenv('DB_NAME', 'travel_db')
         self.charset = 'utf8mb4'
         self.cursorclass = DictCursor
         self.conn = None

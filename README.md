@@ -51,18 +51,31 @@
 ├── travel_backend/          # 后端代码
 │   ├── app.py               # Flask应用主文件
 │   ├── routes.py            # API路由
+│   ├── controller/          # 控制器
+│   ├── service/             # 服务层
+│   ├── mapper/              # 数据访问层
+│   ├── entity/              # 实体类
+│   ├── dto/                 # 数据传输对象
+│   ├── exception/           # 异常处理器
 │   ├── utils/               # 工具函数
 │   │   └── db.py            # 数据库连接
+│   ├── templates/           # 前端HTML模板
+│   ├── static/              # 静态文件
+│   │   └── images/          # 图片上传目录
 │   ├── database.sql         # 数据库结构
-│   └── uploads/             # 图片上传目录
-├── travel_frontend/         # 前端代码
+│   ├── requirements.txt     # Python依赖
+│   └── .env.example         # 环境变量模板
+├── travel_frontend/         # 前端代码（已整合到后端）
 │   ├── index.html           # 首页
 │   ├── login.html           # 登录页
 │   ├── register.html        # 注册页
 │   ├── detail.html          # 攻略详情页
 │   ├── publish.html         # 发布攻略页
-│   └── uploads/             # 前端图片目录
+│   └── edit.html            # 编辑攻略页
+├── start.sh                 # 一键启动脚本
+├── package.sh               # 打包脚本
 ├── database_init.sql        # 数据库初始化脚本
+├── DEPLOYMENT.md            # 部署文档
 └── README.md                # 项目文档
 ```
 
@@ -74,78 +87,128 @@
 
 ## 安装与部署
 
-### 1. 克隆项目
+### 方法一：一键启动（推荐）
+
+1. **克隆项目**
 
 ```bash
 git clone <项目地址>
-cd /project/tuyou
+cd tuyou
 ```
 
-### 2. 安装后端依赖
-
-```bash
-cd travel_backend
-pip install flask flask-cors pyjwt pymysql
-```
-
-### 3. 配置数据库
-
-#### 3.1 创建数据库用户
-
-```sql
-CREATE USER 'travel_user'@'localhost' IDENTIFIED BY '*******';
-GRANT ALL PRIVILEGES ON travel_db.* TO 'travel_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-#### 3.2 初始化数据库
+2. **配置数据库**
 
 ```bash
 # 登录MySQL/MariaDB
 mysql -u root -p
 
 # 执行初始化脚本
-source /project/tuyou/database_init.sql;
+source database_init.sql;
 
 # 退出
 quit;
 ```
 
-### 4. 配置后端数据库连接
-
-编辑 `travel_backend/utils/db.py` 文件，确保数据库连接配置正确：
-
-```python
-# 数据库连接配置
-config = {
-    'host': 'localhost',
-    'user': 'travel_user',
-    'password': '*******',
-    'database': 'travel_db',
-    'port': 3306,
-    'charset': 'utf8mb4'
-}
-```
-
-### 5. 启动服务
-
-#### 5.1 启动后端服务
+3. **配置环境变量**
 
 ```bash
-cd /project/tuyou/travel_backend
-python app.py
+# 复制环境变量模板
+cd travel_backend
+cp .env.example .env
+
+# 编辑.env文件，修改数据库配置
+vi .env
 ```
 
-后端服务将运行在 `http://localhost:5000`
-
-#### 5.2 启动前端服务
+4. **一键启动**
 
 ```bash
-cd /project/tuyou/travel_frontend
-python3 -m http.server 8000
+# 返回项目根目录
+cd ..
+
+# 执行启动脚本
+./start.sh
 ```
 
-前端服务将运行在 `http://localhost:8000`
+服务将运行在 `http://服务器IP:5000`
+
+### 方法二：打包部署
+
+1. **生成打包文件**
+
+```bash
+# 执行打包脚本
+./package.sh
+```
+
+2. **部署到服务器**
+
+```bash
+# 上传打包文件到服务器
+scp tuyou_*.tar.gz user@server_ip:/path/to/destination
+
+# 在服务器上解压
+ssh user@server_ip
+cd /path/to/destination
+tar -xzf tuyou_*.tar.gz
+cd travel_package
+
+# 配置数据库
+mysql -u root -p < database_init.sql
+
+# 配置环境变量
+cd travel_backend
+cp .env.example .env
+vi .env
+
+# 启动服务
+cd ..
+./start.sh
+```
+
+### 方法三：手动部署
+
+1. **克隆项目**
+
+```bash
+git clone <项目地址>
+cd tuyou
+```
+
+2. **安装后端依赖**
+
+```bash
+cd travel_backend
+pip3 install -r requirements.txt
+```
+
+3. **配置数据库**
+
+```bash
+# 登录MySQL/MariaDB
+mysql -u root -p
+
+# 执行初始化脚本
+source ../database_init.sql;
+
+# 退出
+quit;
+```
+
+4. **配置环境变量**
+
+```bash
+cp .env.example .env
+vi .env
+```
+
+5. **启动服务**
+
+```bash
+python3 app.py
+```
+
+服务将运行在 `http://localhost:5000`
 
 ## 数据库结构
 
@@ -212,7 +275,7 @@ python3 -m http.server 8000
 ## 使用说明
 
 1. **访问系统**
-   - 打开浏览器，访问 `http://localhost:8000`
+   - 打开浏览器，访问 `http://服务器IP:5000`
    - 点击登录按钮，使用测试账号登录
 
 2. **浏览攻略**
@@ -221,7 +284,7 @@ python3 -m http.server 8000
    - 点击攻略标题查看详情
 
 3. **发布攻略**
-   - 点击导航栏的"发布攻略"按钮
+   - 登录后点击导航栏的"发布攻略"按钮
    - 填写标题、目的地、内容
    - 选择图片（最多5张）
    - 点击"发布攻略"按钮
@@ -229,6 +292,11 @@ python3 -m http.server 8000
 4. **评论攻略**
    - 在攻略详情页底部填写评论内容
    - 点击"发表评论"按钮
+
+5. **编辑攻略**
+   - 在攻略详情页点击"编辑"按钮
+   - 修改攻略内容
+   - 点击"保存修改"按钮
 
 ## 注意事项
 

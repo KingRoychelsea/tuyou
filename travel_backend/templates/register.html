@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册 - 途游攻略分享平台</title>
+    <link rel="stylesheet" href="index.html">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <h1>途游攻略分享平台</h1>
+            <div class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="login.html">登录</a>
+                <a href="register.html">注册</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 注册表单 -->
+    <div class="container">
+        <div class="form-container">
+            <h2>用户注册</h2>
+            <div class="error-message" id="error-message"></div>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码（至少6位）</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">手机号</label>
+                    <input type="text" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit">注册</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // 注册表单提交
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const phone = document.getElementById('phone').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            // 验证输入
+            if (!username || !password || !phone) {
+                errorMessage.textContent = '用户名、密码、手机号不能为空';
+                return;
+            }
+            
+            if (password.length < 6) {
+                errorMessage.textContent = '密码长度至少6位';
+                return;
+            }
+            
+            // 发送注册请求
+            fetch('http://localhost:5000/api/user/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password, phone })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    // 注册成功，跳转到登录页
+                    alert('注册成功，请登录');
+                    window.location.href = 'login.html';
+                } else {
+                    // 注册失败，显示错误信息
+                    errorMessage.textContent = data.msg;
+                }
+            })
+            .catch(error => {
+                console.error('注册失败:', error);
+                errorMessage.textContent = '注册失败，请稍后重试';
+            });
+        });
+    </script>
+</body>
+</html>

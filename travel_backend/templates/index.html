@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>途游攻略分享平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #333;
+            color: white;
+            padding: 15px 0;
+            margin-bottom: 30px;
+        }
+        
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar h1 {
+            font-size: 24px;
+        }
+        
+        .navbar .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        
+        /* 搜索框样式 */
+        .search-box {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .search-box button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .search-box button:hover {
+            background-color: #45a049;
+        }
+        
+        /* 攻略列表样式 */
+        .strategy-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .strategy-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .strategy-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .strategy-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .strategy-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .strategy-card .meta {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .strategy-card .content {
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .strategy-card .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .strategy-card .btn:hover {
+            background-color: #555;
+        }
+        
+        /* 表单样式 */
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        
+        .form-group button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .form-group button:hover {
+            background-color: #45a049;
+        }
+        
+        /* 攻略详情样式 */
+        .strategy-detail {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .strategy-detail h2 {
+            margin-bottom: 20px;
+        }
+        
+        .strategy-detail .meta {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .strategy-detail .images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .strategy-detail .images img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .strategy-detail .content {
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        /* 评论样式 */
+        .comments-section {
+            margin-top: 30px;
+        }
+        
+        .comments-section h3 {
+            margin-bottom: 20px;
+        }
+        
+        .comment-form {
+            margin-bottom: 30px;
+        }
+        
+        .comment-list {
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        
+        .comment-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .comment-item .meta {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .comment-item .content {
+            color: #333;
+        }
+        
+        /* 错误提示样式 */
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .strategy-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar .container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .navbar .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <h1>途游攻略分享平台</h1>
+            <div class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="login.html" id="login-link">登录</a>
+                <a href="register.html" id="register-link">注册</a>
+                <a href="publish.html" id="publish-link" style="display: none;">发布攻略</a>
+                <a href="#" id="logout-link" style="display: none;">退出</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主内容区 -->
+    <div class="container">
+        <!-- 搜索框 -->
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="搜索攻略标题或目的地...">
+            <button id="search-btn">搜索</button>
+        </div>
+        
+        <!-- 攻略列表 -->
+        <div class="strategy-list" id="strategy-list">
+            <!-- 攻略卡片将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let token = localStorage.getItem('token');
+        let userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新导航栏
+            updateNavbar();
+            // 加载攻略列表
+            loadStrategies();
+            // 绑定搜索事件
+            document.getElementById('search-btn').addEventListener('click', function() {
+                const keyword = document.getElementById('search-input').value;
+                loadStrategies(keyword);
+            });
+            // 绑定退出事件
+            document.getElementById('logout-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+        });
+        
+        // 更新导航栏
+        function updateNavbar() {
+            if (token) {
+                document.getElementById('login-link').style.display = 'none';
+                document.getElementById('register-link').style.display = 'none';
+                document.getElementById('publish-link').style.display = 'block';
+                document.getElementById('logout-link').style.display = 'block';
+            } else {
+                document.getElementById('login-link').style.display = 'block';
+                document.getElementById('register-link').style.display = 'block';
+                document.getElementById('publish-link').style.display = 'none';
+                document.getElementById('logout-link').style.display = 'none';
+            }
+        }
+        
+        // 加载攻略列表
+        function loadStrategies(keyword = '') {
+            const url = `http://localhost:5000/api/strategy/list?keyword=${encodeURIComponent(keyword)}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        renderStrategies(data.data);
+                    } else {
+                        alert(data.msg);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载攻略失败:', error);
+                    alert('加载攻略失败，请稍后重试');
+                });
+        }
+        
+        // 渲染攻略列表
+        function renderStrategies(strategies) {
+            const listContainer = document.getElementById('strategy-list');
+            listContainer.innerHTML = '';
+            
+            if (strategies.length === 0) {
+                listContainer.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">暂无攻略</p>';
+                return;
+            }
+            
+            strategies.forEach(strategy => {
+                const card = document.createElement('div');
+                card.className = 'strategy-card';
+                
+                // 处理图片
+                let imagesHtml = '';
+                if (strategy.images) {
+                    const firstImage = strategy.images.split(',')[0];
+                    imagesHtml = `<img src="http://localhost:5000/static/${firstImage}" alt="攻略图片">`;
+                } else {
+                    imagesHtml = '<div style="width: 100%; height: 200px; background-color: #f0f0f0; border-radius: 4px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: #999;">暂无图片</div>';
+                }
+                
+                card.innerHTML = `
+                    ${imagesHtml}
+                    <h3>${strategy.title}</h3>
+                    <div class="meta">
+                        <span>目的地: ${strategy.destination}</span> | 
+                        <span>发布者: ${strategy.publisher}</span> | 
+                        <span>发布时间: ${formatDate(strategy.create_time)}</span>
+                    </div>
+                    <div class="content">${strategy.content.substring(0, 100)}${strategy.content.length > 100 ? '...' : ''}</div>
+                    <a href="detail.html?id=${strategy.id}" class="btn">查看详情</a>
+                `;
+                
+                listContainer.appendChild(card);
+            });
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userInfo');
+            token = null;
+            userInfo = null;
+            updateNavbar();
+            alert('退出成功');
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>
